@@ -143,10 +143,15 @@
         var button = event.target && event.target.closest ? event.target.closest('button') : null;
         var link = event.target && event.target.closest ? event.target.closest('a') : null;
         var productNavButton = event.target && event.target.closest ? event.target.closest('.product-image-nav .product-nav-btn') : null;
+        var productLinkHref = link ? (link.getAttribute('href') || '') : '';
+        var suppressProductNav = window.__suppressProductNavUntil && Date.now() < window.__suppressProductNavUntil;
 
         // Keep product card arrows focused on image switching, not card navigation.
-        if (productNavButton) {
+        if (productNavButton || (suppressProductNav && /^\/product\//.test(productLinkHref))) {
           event.preventDefault();
+          if (suppressProductNav) {
+            window.__suppressProductNavUntil = 0;
+          }
           return;
         }
 
@@ -190,6 +195,14 @@
         var message = buildOrderMessage(button);
         var url = 'https://wa.me/923300794650?text=' + encodeURIComponent(message);
         window.open(url, '_blank', 'noopener,noreferrer');
+      }, true);
+
+      // On touch devices, arrow tap can generate a follow-up link click. Mark and suppress it.
+      document.addEventListener('pointerdown', function (event) {
+        var productNavButton = event.target && event.target.closest ? event.target.closest('.product-image-nav .product-nav-btn') : null;
+        if (productNavButton) {
+          window.__suppressProductNavUntil = Date.now() + 1200;
+        }
       }, true);
 
       // Improve touch navigation: first tap opens mobile dropdown, second tap follows link.
