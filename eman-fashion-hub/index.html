@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="./logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1a1a2e" />
+    <meta name="description" content="Eman Fashion Hub - Premium Pakistani Fashion. Shop unstitched, ready-to-wear, bridal, formal wear and accessories. Quality fabrics with elegant designs." />
+    <meta name="keywords" content="Pakistani fashion, unstitched suits, ready to wear, bridal collection, formal wear, Pakistani clothing" />
+    <meta name="author" content="Eman Fashion Hub" />
+    <link rel="canonical" href="./index.html" />
+    <meta property="og:title" content="Eman Fashion Hub - Premium Pakistani Fashion" />
+    <meta property="og:description" content="Shop unstitched, ready-to-wear, bridal, formal wear, accessories and watches." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="./logo.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Eman Fashion Hub - Premium Pakistani Fashion" />
+    <meta name="twitter:description" content="Elegant Pakistani fashion collections with new arrivals and sale deals." />
+    <title>Eman Fashion Hub - Premium Pakistani Fashion</title>
+    <script type="module" crossorigin src="./assets/index-C5f9fEPq.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-D1KQcopq.css">
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      if ('scrollRestoration' in window.history) {
+        window.history.scrollRestoration = 'manual';
+      }
+
+      function scrollPageToTop() {
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      }
+
+      (function normalizeHomeRoute() {
+        var path = window.location.pathname || '/';
+        var isIndexEntry = /\/index\.html$/i.test(path);
+        if (isIndexEntry) {
+          var normalizedPath = path.replace(/index\.html$/i, '');
+          if (!normalizedPath) normalizedPath = '/';
+          window.history.replaceState(window.history.state, '', normalizedPath + window.location.search + window.location.hash);
+        }
+      })();
+
+      window.addEventListener('load', function () {
+        scrollPageToTop();
+      });
+
+      window.addEventListener('pageshow', function () {
+        scrollPageToTop();
+      });
+
+      window.addEventListener('popstate', function () {
+        setTimeout(scrollPageToTop, 0);
+      });
+
+      (function patchHistoryForScrollReset() {
+        var originalPushState = window.history.pushState;
+        var originalReplaceState = window.history.replaceState;
+
+        window.history.pushState = function () {
+          var result = originalPushState.apply(window.history, arguments);
+          setTimeout(scrollPageToTop, 0);
+          return result;
+        };
+
+        window.history.replaceState = function () {
+          var result = originalReplaceState.apply(window.history, arguments);
+          setTimeout(scrollPageToTop, 0);
+          return result;
+        };
+      })();
+
+      document.addEventListener('error', function (event) {
+        var target = event.target;
+        if (!target || target.tagName !== 'IMG') return;
+        if (target.dataset.fallbackApplied === '1') return;
+        target.dataset.fallbackApplied = '1';
+        target.src = './image-fallback.png';
+      }, true);
+
+      function getText(selector, fallback) {
+        var el = document.querySelector(selector);
+        return el && el.textContent ? el.textContent.trim() : fallback;
+      }
+
+      function buildOrderMessage(button) {
+        var lines = ['Assalam o Alaikum, I want to place an order.'];
+
+        var cartRows = document.querySelectorAll('.cart-item-row');
+        if (cartRows && cartRows.length > 0) {
+          lines.push('', 'Order details:');
+          cartRows.forEach(function (row, idx) {
+            var name = row.querySelector('.item-name');
+            var variant = row.querySelector('.item-variant');
+            var qty = row.querySelector('.quantity-control span');
+            var total = row.querySelector('.col-total');
+
+            lines.push(
+              (idx + 1) +
+                '. ' +
+                (name ? name.textContent.trim() : 'Product') +
+                ' | ' +
+                (variant ? variant.textContent.trim() : 'Variant') +
+                ' | Qty: ' +
+                (qty ? qty.textContent.trim() : '1') +
+                ' | Total: ' +
+                (total ? total.textContent.trim() : 'N/A')
+            );
+          });
+
+          lines.push('Grand Total: ' + getText('.total-row span:last-child', 'N/A'));
+        } else {
+          var productName = getText('.product-title', getText('h1', 'Product'));
+          var size = getText('.size-btn.active', 'Not selected');
+          var color = getText('.color-btn.active', 'Not selected');
+          var qtyText = getText('.quantity-selector span', '1');
+          var price = getText('.product-price .current-price', 'N/A');
+
+          lines.push('', 'Selected item:');
+          lines.push('Product: ' + productName);
+          lines.push('Size: ' + size);
+          lines.push('Color: ' + color);
+          lines.push('Quantity: ' + qtyText);
+          lines.push('Price: ' + price);
+        }
+
+        lines.push('', 'Page: ' + window.location.href);
+        return lines.join('\n');
+      }
+
+      document.addEventListener('click', function (event) {
+        var button = event.target && event.target.closest ? event.target.closest('button') : null;
+        var link = event.target && event.target.closest ? event.target.closest('a') : null;
+
+        if (link) {
+          var href = link.getAttribute('href') || '';
+          var isInternalLink = href && href.indexOf('http') !== 0 && href.indexOf('tel:') !== 0 && href.indexOf('mailto:') !== 0 && href.indexOf('#') !== 0;
+          if (isInternalLink) {
+            setTimeout(scrollPageToTop, 0);
+          }
+        }
+
+        if (!button) return;
+
+        var className = button.className || '';
+        var label = (button.textContent || '').toLowerCase();
+        var isOrderAction =
+          className.indexOf('add-to-cart-btn') !== -1 ||
+          className.indexOf('buy-now-btn') !== -1 ||
+          className.indexOf('checkout-btn') !== -1 ||
+          label.indexOf('order') !== -1 ||
+          label.indexOf('checkout') !== -1 ||
+          label.indexOf('buy now') !== -1;
+
+        if (!isOrderAction) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+        var message = buildOrderMessage(button);
+        var url = 'https://wa.me/923300794650?text=' + encodeURIComponent(message);
+        window.open(url, '_blank', 'noopener,noreferrer');
+      }, true);
+    </script>
+  </body>
+</html>
