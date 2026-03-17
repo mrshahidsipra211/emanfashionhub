@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Eman Fashion Hub</title>
+    <script>
+      // SPA redirect: on 404, redirect to home and let React Router handle routing
+      var pathSegments = window.location.pathname.split('/').filter(Boolean);
+      if (pathSegments.length > 0 && pathSegments[0] !== '') {
+        // Preserve the path for React Router
+        sessionStorage.redirect = window.location.pathname + window.location.search + window.location.hash;
+        window.location.href = '/';
+      }
+    </script>
+  </head>
+  <body>
+    Redirecting...
+  </body>
+</html>
