@@ -139,6 +139,122 @@
         return lines.join('\n');
       }
 
+      function ensureOrderSourceModal() {
+        var existing = document.getElementById('order-source-modal');
+        if (existing) return existing;
+
+        var style = document.createElement('style');
+        style.textContent =
+          '#order-source-modal{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(14,18,30,.58);backdrop-filter:blur(6px)}' +
+          '#order-source-modal.visible{display:flex}' +
+          '#order-source-modal .osm-card{width:min(92vw,420px);border-radius:18px;padding:22px 18px;background:linear-gradient(145deg,#fff 0%,#f6f9ff 100%);box-shadow:0 20px 50px rgba(14,18,30,.24);border:1px solid rgba(16,26,46,.08);font-family:Segoe UI,Tahoma,sans-serif;transform:translateY(8px);opacity:0;transition:all .22s ease}' +
+          '#order-source-modal.visible .osm-card{transform:translateY(0);opacity:1}' +
+          '#order-source-modal .osm-title{margin:0 0 6px;font-size:20px;font-weight:700;color:#121a2e}' +
+          '#order-source-modal .osm-sub{margin:0 0 16px;font-size:14px;color:#54607a}' +
+          '#order-source-modal .osm-grid{display:grid;grid-template-columns:1fr;gap:10px}' +
+          '#order-source-modal .osm-btn{border:0;border-radius:12px;padding:12px 14px;font-size:15px;font-weight:700;cursor:pointer;transition:transform .12s ease,filter .12s ease}' +
+          '#order-source-modal .osm-btn:hover{filter:brightness(1.02)}' +
+          '#order-source-modal .osm-btn:active{transform:scale(.985)}' +
+          '#order-source-modal .osm-source-1{background:#0d7b5f;color:#fff}' +
+          '#order-source-modal .osm-source-2{background:#114a9c;color:#fff}' +
+          '#order-source-modal .osm-cancel{background:#edf1f9;color:#22314f;font-weight:600}';
+        document.head.appendChild(style);
+
+        var modal = document.createElement('div');
+        modal.id = 'order-source-modal';
+        modal.innerHTML =
+          '<div class="osm-card" role="dialog" aria-modal="true" aria-labelledby="osm-title">' +
+          '<h3 id="osm-title" class="osm-title">Choose Order Source</h3>' +
+          '<p class="osm-sub">Select where you want to send your order.</p>' +
+          '<div class="osm-grid">' +
+          '<button type="button" class="osm-btn osm-source-1" data-source="1">Source 1 (WhatsApp 0330 0794650)</button>' +
+          '<button type="button" class="osm-btn osm-source-2" data-source="2">Source 2 (WhatsApp 0343 8322854)</button>' +
+          '<button type="button" class="osm-btn osm-cancel" data-source="cancel">Cancel</button>' +
+          '</div>' +
+          '</div>';
+        document.body.appendChild(modal);
+        return modal;
+      }
+
+      function openOrderSourceModal(onSelect) {
+        var modal = ensureOrderSourceModal();
+        var clickHandler = function (event) {
+          var sourceButton = event.target && event.target.closest ? event.target.closest('[data-source]') : null;
+          if (!sourceButton) {
+            if (event.target === modal) {
+              closeModal(null);
+            }
+            return;
+          }
+
+          var source = sourceButton.getAttribute('data-source');
+          if (source === 'cancel') {
+            closeModal(null);
+            return;
+          }
+          closeModal(source);
+        };
+
+        var keyHandler = function (event) {
+          if (event.key === 'Escape') {
+            closeModal(null);
+          }
+        };
+
+        function closeModal(source) {
+          modal.classList.remove('visible');
+          modal.removeEventListener('click', clickHandler, true);
+          document.removeEventListener('keydown', keyHandler, true);
+          if (typeof onSelect === 'function') onSelect(source);
+        }
+
+        modal.classList.add('visible');
+        modal.addEventListener('click', clickHandler, true);
+        document.addEventListener('keydown', keyHandler, true);
+      }
+
+      function enforceOrderOnlyMode() {
+        function patchButtons(root) {
+          var scope = root && root.querySelectorAll ? root : document;
+          var allButtons = scope.querySelectorAll('button, a');
+          allButtons.forEach(function (el) {
+            var text = (el.textContent || '').trim().toLowerCase();
+            var classes = (el.className || '').toString().toLowerCase();
+            var isAddToCart = text === 'add to cart' || text.indexOf('add to cart') !== -1 || classes.indexOf('add-to-cart') !== -1;
+
+            if (isAddToCart) {
+              el.style.display = 'none';
+              el.setAttribute('aria-hidden', 'true');
+            }
+
+            var isOrderNow = text === 'order now' || text.indexOf('order now') !== -1 || classes.indexOf('buy-now-btn') !== -1;
+            if (isOrderNow && el.style.display !== 'none') {
+              el.style.width = '100%';
+            }
+          });
+        }
+
+        patchButtons(document);
+
+        var observer = new MutationObserver(function (mutations) {
+          mutations.forEach(function (mutation) {
+            mutation.addedNodes.forEach(function (node) {
+              if (node && node.nodeType === 1) {
+                patchButtons(node);
+              }
+            });
+          });
+        });
+
+        observer.observe(document.body, { childList: true, subtree: true });
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', enforceOrderOnlyMode);
+      } else {
+        enforceOrderOnlyMode();
+      }
+
       document.addEventListener('click', function (event) {
         var button = event.target && event.target.closest ? event.target.closest('button') : null;
         var link = event.target && event.target.closest ? event.target.closest('a') : null;
@@ -181,7 +297,6 @@
         var className = button.className || '';
         var label = (button.textContent || '').toLowerCase();
         var isOrderAction =
-          className.indexOf('add-to-cart-btn') !== -1 ||
           className.indexOf('buy-now-btn') !== -1 ||
           className.indexOf('checkout-btn') !== -1 ||
           label.indexOf('order') !== -1 ||
@@ -193,12 +308,12 @@
         event.preventDefault();
         event.stopPropagation();
         var message = buildOrderMessage(button);
-        var sourceChoice = window.prompt('Choose order source:\n1) Source 1\n2) Source 2', '1');
-        if (sourceChoice === null) return;
-        var normalizedChoice = String(sourceChoice).trim();
-        var targetNumber = normalizedChoice === '2' ? '923438322854' : '923300794650';
-        var url = 'https://wa.me/' + targetNumber + '?text=' + encodeURIComponent(message);
-        window.open(url, '_blank', 'noopener,noreferrer');
+        openOrderSourceModal(function (source) {
+          if (!source) return;
+          var targetNumber = source === '2' ? '923438322854' : '923300794650';
+          var url = 'https://wa.me/' + targetNumber + '?text=' + encodeURIComponent(message);
+          window.open(url, '_blank', 'noopener,noreferrer');
+        });
       }, true);
 
       // On touch devices, arrow tap can generate a follow-up link click. Mark and suppress it.
