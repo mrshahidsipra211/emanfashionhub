@@ -171,6 +171,34 @@
         var url = 'https://wa.me/923300794650?text=' + encodeURIComponent(message);
         window.open(url, '_blank', 'noopener,noreferrer');
       }, true);
+
+      // Improve touch navigation: first tap opens mobile dropdown, second tap follows link.
+      (function enableMobileDropdownMenu() {
+        document.addEventListener('click', function (event) {
+          if (window.innerWidth > 768) return;
+          var link = event.target && event.target.closest ? event.target.closest('.main-nav .nav-item.has-dropdown > a') : null;
+          if (!link) return;
+          var item = link.parentElement;
+          if (!item) return;
+          if (!item.classList.contains('mobile-open')) {
+            event.preventDefault();
+            var openItems = document.querySelectorAll('.main-nav .nav-item.has-dropdown.mobile-open');
+            openItems.forEach(function (openItem) {
+              if (openItem !== item) openItem.classList.remove('mobile-open');
+            });
+            item.classList.add('mobile-open');
+          }
+        }, true);
+
+        window.addEventListener('resize', function () {
+          if (window.innerWidth > 768) {
+            var openItems = document.querySelectorAll('.main-nav .nav-item.has-dropdown.mobile-open');
+            openItems.forEach(function (item) {
+              item.classList.remove('mobile-open');
+            });
+          }
+        });
+      })();
     </script>
   </body>
 </html>
