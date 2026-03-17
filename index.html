@@ -153,6 +153,19 @@
         if (link) {
           var href = link.getAttribute('href') || '';
           var isInternalLink = href && href.indexOf('http') !== 0 && href.indexOf('tel:') !== 0 && href.indexOf('mailto:') !== 0 && href.indexOf('#') !== 0;
+
+          // Convert plain internal route anchors to SPA navigation to avoid full reload.
+          var isSpaRoute = /^\/(shop|product|cart|about|contact)(\/|$|\?)/.test(href);
+          if (isSpaRoute) {
+            event.preventDefault();
+            if (window.location.pathname + window.location.search + window.location.hash !== href) {
+              window.history.pushState({}, '', href);
+              window.dispatchEvent(new PopStateEvent('popstate'));
+            }
+            setTimeout(scrollPageToTop, 0);
+            return;
+          }
+
           if (isInternalLink) {
             setTimeout(scrollPageToTop, 0);
           }
