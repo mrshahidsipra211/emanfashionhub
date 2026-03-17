@@ -142,6 +142,13 @@
       document.addEventListener('click', function (event) {
         var button = event.target && event.target.closest ? event.target.closest('button') : null;
         var link = event.target && event.target.closest ? event.target.closest('a') : null;
+        var productNavButton = event.target && event.target.closest ? event.target.closest('.product-image-nav .product-nav-btn') : null;
+
+        // Keep product card arrows focused on image switching, not card navigation.
+        if (productNavButton) {
+          event.preventDefault();
+          return;
+        }
 
         if (link) {
           var href = link.getAttribute('href') || '';
