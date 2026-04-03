@@ -20,7 +20,9 @@
   // Strategy 1: Global variable for React to find
   window.newProductsToAdd = newProducts;
   
-  // Strategy 2: Intercept fetch calls
+  // Strategy 2: Intercept fetch calls and filter products
+  const oldCategoryNames = ["unstitched", "ready-to-wear", "Bridal", "formal", "Accessories"];
+  
   const originalFetch = window.fetch;
   window.fetch = function(...args) {
     return originalFetch.apply(this, args).then(response => {
@@ -28,7 +30,14 @@
       if (response.headers.get('content-type')?.includes('application/json')) {
         cloned.json().then(data => {
           if (Array.isArray(data) && data.some(item => item.id && item.name)) {
-            window._productsLoaded = [...data, ...newProducts.filter(np => !data.some(p => p.id === np.id))];
+            // Filter out products with old category names
+            const filteredOldProducts = data.filter(p => 
+              !oldCategoryNames.some(oldCat => 
+                p.category?.toLowerCase() === oldCat.toLowerCase()
+              )
+            );
+            // Only keep new products
+            window._productsLoaded = newProducts;
           }
         }).catch(() => {});
       }
@@ -54,9 +63,40 @@
     injectProductsOnDOM();
   }
   
-  // Strategy 6: Aggressively replace old categories with new ones
+  // Strategy 6: Remove old category buttons and product cards
+  function removeOldCategoriesAndProducts() {
+    const oldCategories = ['unstitched', 'ready-to-wear', 'Bridal', 'formal', 'Accessories'];
+    
+    // Remove buttons/elements that contain old category names
+    document.querySelectorAll('button, [role="button"], div, span, li').forEach(el => {
+      const text = el.textContent?.toLowerCase().trim();
+      if (text && oldCategories.some(cat => text === cat.toLowerCase())) {
+        el.style.display = 'none';
+      }
+    });
+    
+    // Remove product cards from old categories
+    document.querySelectorAll('[class*="product"], [class*="card"], [data-product]').forEach(el => {
+      const html = el.innerHTML.toLowerCase();
+      const dataArea = el.textContent?.toLowerCase();
+      if (oldCategories.some(cat => 
+        html.includes(cat.toLowerCase()) || 
+        dataArea?.includes(cat.toLowerCase())
+      )) {
+        el.style.display = 'none';
+      }
+    });
+  }
+  
+  // Run removal repeatedly
+  removeOldCategoriesAndProducts();
+  setInterval(removeOldCategoriesAndProducts, 2000);
+  
+  // Strategy 7: Aggressively replace old categories with new ones and hide old ones
   function aggressivelyReplaceCategories() {
-    // Map old categories to new ones
+    const oldCategories = ['unstitched', 'ready-to-wear', 'Bridal', 'formal', 'Accessories'];
+    const newCategories = ["Clothes", "Jewelry", "Watches", "Bags", "Other Accessories"];
+    
     const categoryMap = {
       'unstitched': 'Clothes',
       'ready-to-wear': 'Clothes',
@@ -102,6 +142,23 @@
     
     // Walk through DOM and replace text
     walkAndReplace(document.body);
+    
+    // Hide elements with old category names in text/attributes
+    document.querySelectorAll('*').forEach(el => {
+      const text = (el.textContent + el.innerHTML).toLowerCase();
+      if (oldCategories.some(cat => text.includes(cat.toLowerCase()))) {
+        // Check if it's just a category button/label that needs hiding
+        if (el.classList?.toString().includes('category') || 
+            el.getAttribute('role') === 'button' ||
+            el.tagName === 'BUTTON') {
+          // Mark for checking parent structure
+          const parent = el.parentElement;
+          if (parent && parent.classList?.toString().includes('category')) {
+            el.style.display = 'none';
+          }
+        }
+      }
+    });
   }
   
   // Run immediately and repeatedly
