@@ -63,63 +63,35 @@
     injectProductsOnDOM();
   }
   
-  // Strategy 6: Aggressively remove "Ready to Wear" category
-  function removeReadyToWeareCategory() {
-    const keywords = ['ready to wear', 'readytowear', 'ready-to-wear'];
+  // Strategy 6: Surgically remove "Ready to Wear" and old categories without collapsing layout
+  function removeOldCategories() {
+    const oldCategories = ['unstitched', 'ready-to-wear', 'Bridal', 'formal', 'Accessories'];
     
-    // Find and remove any element containing "Ready to Wear"
-    document.querySelectorAll('*').forEach(el => {
-      const text = el.textContent?.toLowerCase() || '';
-      const html = el.innerHTML?.toLowerCase() || '';
+    // Find category cards/buttons more carefully
+    document.querySelectorAll('div, button, [role="button"]').forEach(el => {
+      const text = el.textContent?.trim().toLowerCase() || '';
       
-      // If element text is EXACTLY "ready to wear" or contains it prominently
-      if (keywords.some(kw => text.trim() === kw.trim() || (text.includes(kw) && el.children.length === 0))) {
-        // If it's a button or card, hide it completely
-        if (el.tagName === 'BUTTON' || el.tagName === 'DIV' || el.tagName === 'LI' || el.classList?.toString().includes('category')) {
-          el.style.display = 'none !important';
-          el.style.visibility = 'hidden';
-          el.style.height = '0';
-          el.style.overflow = 'hidden';
+      // Only hide if text EXACTLY matches an old category (not parent containers)
+      if (oldCategories.some(cat => text === cat.toLowerCase())) {
+        // Check if this looks like a category card (has background image, etc)
+        const style = window.getComputedStyle(el);
+        const hasBackgroundImage = style.backgroundImage !== 'none';
+        const hasGridArea = el.classList?.toString().includes('category') || el.classList?.toString().includes('card');
+        
+        // If it's likely a category card, just make it invisible without collapsing
+        if (hasBackgroundImage || hasGridArea || el.tagName === 'BUTTON') {
+          el.style.opacity = '0';
+          el.style.pointerEvents = 'none';
+          el.style.position = 'absolute';
+          el.style.left = '-9999px';
         }
       }
     });
   }
   
-  // Strategy 7: Remove old category buttons and product cards
-  function removeOldCategoriesAndProducts() {
-    const oldCategories = ['unstitched', 'ready-to-wear', 'Bridal', 'formal', 'Accessories'];
-    
-    // Remove buttons/elements that contain old category names
-    document.querySelectorAll('button, [role="button"], div, span, li').forEach(el => {
-      const text = el.textContent?.toLowerCase().trim();
-      if (text && oldCategories.some(cat => text === cat.toLowerCase())) {
-        el.style.display = 'none !important';
-        el.style.visibility = 'hidden';
-        el.style.height = '0';
-      }
-    });
-    
-    // Remove product cards from old categories
-    document.querySelectorAll('[class*="product"], [class*="card"], [data-product]').forEach(el => {
-      const html = el.innerHTML.toLowerCase();
-      const dataArea = el.textContent?.toLowerCase();
-      if (oldCategories.some(cat => 
-        html.includes(cat.toLowerCase()) || 
-        dataArea?.includes(cat.toLowerCase())
-      )) {
-        el.style.display = 'none !important';
-        el.style.visibility = 'hidden';
-      }
-    });
-  }
-  
-  // Run removal repeatedly
-  removeReadyToWeareCategory();
-  removeOldCategoriesAndProducts();
-  setInterval(() => {
-    removeReadyToWeareCategory();
-    removeOldCategoriesAndProducts();
-  }, 1000);
+  // Run removal and category replacement together
+  removeOldCategories();
+  setInterval(removeOldCategories, 2000);
   
   // Strategy 7: Aggressively replace old categories with new ones and hide old ones
   function aggressivelyReplaceCategories() {
