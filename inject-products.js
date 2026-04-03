@@ -54,36 +54,59 @@
     injectProductsOnDOM();
   }
   
-  // Strategy 6: Monitor for React state updates and replace categories
-  function monitorAndReplaceCategories() {
-    const oldCategories = ["unstitched", "ready-to-wear", "Bridal", "formal", "Accessories"];
-    const categoryElements = document.querySelectorAll('button, span, div, li');
-    
-    categoryElements.forEach(el => {
-      const text = el.textContent?.trim();
-      if (oldCategories.some(cat => text === cat || text?.includes(cat))) {
-        // Try to update the element
-        el.textContent = mapOldCategoryToNew(text);
-      }
-    });
-    
-    // Schedule another check after a delay
-    setTimeout(monitorAndReplaceCategories, 2000);
-  }
-  
-  function mapOldCategoryToNew(oldCat) {
-    const mapping = {
+  // Strategy 6: Aggressively replace old categories with new ones
+  function aggressivelyReplaceCategories() {
+    // Map old categories to new ones
+    const categoryMap = {
       'unstitched': 'Clothes',
       'ready-to-wear': 'Clothes',
-      'Bridal': 'Jewelry', // or could be other categories
+      'Bridal': 'Jewelry',
       'formal': 'Clothes',
       'Accessories': 'Other Accessories'
     };
-    return mapping[oldCat?.trim()] || oldCat;
+    
+    // Find all text nodes and replace category names
+    function walkAndReplace(node) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        let text = node.textContent;
+        let modified = false;
+        
+        for (let [old, newCat] of Object.entries(categoryMap)) {
+          const regex = new RegExp(`\\b${old}\\b`, 'gi');
+          if (regex.test(text)) {
+            text = text.replace(regex, newCat);
+            modified = true;
+          }
+        }
+        
+        if (modified) {
+          node.textContent = text;
+        }
+      } else if (node.nodeType === Node.ELEMENT_NODE && node.nodeName !== 'SCRIPT') {
+        Array.from(node.childNodes).forEach(walkAndReplace);
+      }
+    }
+    
+    // Also replace in data attributes and aria-labels
+    document.querySelectorAll('[data-category], [aria-label]').forEach(el => {
+      ['data-category', 'aria-label', 'title'].forEach(attr => {
+        if (el.hasAttribute(attr)) {
+          let val = el.getAttribute(attr);
+          for (let [old, newCat] of Object.entries(categoryMap)) {
+            val = val.replace(new RegExp(`\\b${old}\\b`, 'gi'), newCat);
+          }
+          el.setAttribute(attr, val);
+        }
+      });
+    });
+    
+    // Walk through DOM and replace text
+    walkAndReplace(document.body);
   }
   
-  // Start monitoring after a delay to let React render
-  setTimeout(monitorAndReplaceCategories, 1000);
+  // Run immediately and repeatedly
+  aggressivelyReplaceCategories();
+  setInterval(aggressivelyReplaceCategories, 1500);
   
   function injectProductsOnDOM() {
     // Try to find product containers and add new products
