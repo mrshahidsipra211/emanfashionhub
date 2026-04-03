@@ -41,12 +41,49 @@
   localStorage.setItem('allProducts', JSON.stringify(newProducts));
   sessionStorage.setItem('products', JSON.stringify(newProducts));
   
-  // Strategy 4: Watch for DOM updates and inject products visually
+  // Strategy 4: Replace categories in React app
+  const newCategories = ["Clothes", "Jewelry", "Watches", "Bags", "Other Accessories"];
+  window.newCategoriesForApp = newCategories;
+  localStorage.setItem('categories', JSON.stringify(newCategories));
+  sessionStorage.setItem('categories', JSON.stringify(newCategories));
+  
+  // Strategy 5: Watch for DOM updates and inject products visually
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => injectProductsOnDOM());
   } else {
     injectProductsOnDOM();
   }
+  
+  // Strategy 6: Monitor for React state updates and replace categories
+  function monitorAndReplaceCategories() {
+    const oldCategories = ["unstitched", "ready-to-wear", "Bridal", "formal", "Accessories"];
+    const categoryElements = document.querySelectorAll('button, span, div, li');
+    
+    categoryElements.forEach(el => {
+      const text = el.textContent?.trim();
+      if (oldCategories.some(cat => text === cat || text?.includes(cat))) {
+        // Try to update the element
+        el.textContent = mapOldCategoryToNew(text);
+      }
+    });
+    
+    // Schedule another check after a delay
+    setTimeout(monitorAndReplaceCategories, 2000);
+  }
+  
+  function mapOldCategoryToNew(oldCat) {
+    const mapping = {
+      'unstitched': 'Clothes',
+      'ready-to-wear': 'Clothes',
+      'Bridal': 'Jewelry', // or could be other categories
+      'formal': 'Clothes',
+      'Accessories': 'Other Accessories'
+    };
+    return mapping[oldCat?.trim()] || oldCat;
+  }
+  
+  // Start monitoring after a delay to let React render
+  setTimeout(monitorAndReplaceCategories, 1000);
   
   function injectProductsOnDOM() {
     // Try to find product containers and add new products
