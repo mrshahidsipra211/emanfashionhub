@@ -63,7 +63,29 @@
     injectProductsOnDOM();
   }
   
-  // Strategy 6: Remove old category buttons and product cards
+  // Strategy 6: Aggressively remove "Ready to Wear" category
+  function removeReadyToWeareCategory() {
+    const keywords = ['ready to wear', 'readytowear', 'ready-to-wear'];
+    
+    // Find and remove any element containing "Ready to Wear"
+    document.querySelectorAll('*').forEach(el => {
+      const text = el.textContent?.toLowerCase() || '';
+      const html = el.innerHTML?.toLowerCase() || '';
+      
+      // If element text is EXACTLY "ready to wear" or contains it prominently
+      if (keywords.some(kw => text.trim() === kw.trim() || (text.includes(kw) && el.children.length === 0))) {
+        // If it's a button or card, hide it completely
+        if (el.tagName === 'BUTTON' || el.tagName === 'DIV' || el.tagName === 'LI' || el.classList?.toString().includes('category')) {
+          el.style.display = 'none !important';
+          el.style.visibility = 'hidden';
+          el.style.height = '0';
+          el.style.overflow = 'hidden';
+        }
+      }
+    });
+  }
+  
+  // Strategy 7: Remove old category buttons and product cards
   function removeOldCategoriesAndProducts() {
     const oldCategories = ['unstitched', 'ready-to-wear', 'Bridal', 'formal', 'Accessories'];
     
@@ -71,7 +93,9 @@
     document.querySelectorAll('button, [role="button"], div, span, li').forEach(el => {
       const text = el.textContent?.toLowerCase().trim();
       if (text && oldCategories.some(cat => text === cat.toLowerCase())) {
-        el.style.display = 'none';
+        el.style.display = 'none !important';
+        el.style.visibility = 'hidden';
+        el.style.height = '0';
       }
     });
     
@@ -83,14 +107,19 @@
         html.includes(cat.toLowerCase()) || 
         dataArea?.includes(cat.toLowerCase())
       )) {
-        el.style.display = 'none';
+        el.style.display = 'none !important';
+        el.style.visibility = 'hidden';
       }
     });
   }
   
   // Run removal repeatedly
+  removeReadyToWeareCategory();
   removeOldCategoriesAndProducts();
-  setInterval(removeOldCategoriesAndProducts, 2000);
+  setInterval(() => {
+    removeReadyToWeareCategory();
+    removeOldCategoriesAndProducts();
+  }, 1000);
   
   // Strategy 7: Aggressively replace old categories with new ones and hide old ones
   function aggressivelyReplaceCategories() {
