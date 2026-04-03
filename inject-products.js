@@ -63,35 +63,51 @@
     injectProductsOnDOM();
   }
   
-  // Strategy 6: Surgically remove "Ready to Wear" and old categories without collapsing layout
-  function removeOldCategories() {
+  // Strategy 6: Aggressively remove old category elements from DOM
+  function removeOldCategoriesFromDOM() {
     const oldCategories = ['unstitched', 'ready-to-wear', 'Bridal', 'formal', 'Accessories'];
     
-    // Find category cards/buttons more carefully
-    document.querySelectorAll('div, button, [role="button"]').forEach(el => {
+    // Find ALL elements and remove if they contain ONLY old category text
+    document.querySelectorAll('div, button, [role="button"], li, article, section').forEach(el => {
       const text = el.textContent?.trim().toLowerCase() || '';
+      const directText = Array.from(el.childNodes)
+        .filter(node => node.nodeType === Node.TEXT_NODE)
+        .map(node => node.textContent.trim().toLowerCase())
+        .join(' ');
       
-      // Only hide if text EXACTLY matches an old category (not parent containers)
-      if (oldCategories.some(cat => text === cat.toLowerCase())) {
-        // Check if this looks like a category card (has background image, etc)
-        const style = window.getComputedStyle(el);
-        const hasBackgroundImage = style.backgroundImage !== 'none';
-        const hasGridArea = el.classList?.toString().includes('category') || el.classList?.toString().includes('card');
-        
-        // If it's likely a category card, just make it invisible without collapsing
-        if (hasBackgroundImage || hasGridArea || el.tagName === 'BUTTON') {
-          el.style.opacity = '0';
-          el.style.pointerEvents = 'none';
-          el.style.position = 'absolute';
-          el.style.left = '-9999px';
+      // If element is EXACTLY an old category, remove it completely
+      if (oldCategories.some(cat => {
+        return text === cat.toLowerCase() || 
+               (directText && directText.includes(cat.toLowerCase()) && el.children.length <= 2);
+      })) {
+        // Check if parent should also be removed (likely a category card container)
+        const parent = el.parentElement;
+        if (parent && (parent.classList?.toString().includes('grid') || 
+                      parent.classList?.toString().includes('category') ||
+                      parent.classList?.toString().includes('product'))) {
+          // Remove the specific category card
+          el.remove();
+        } else if (el.classList?.toString().includes('category') || 
+                   el.classList?.toString().includes('card') ||
+                   el.tagName === 'BUTTON') {
+          // Direct removal if it's a card or button
+          el.remove();
         }
       }
     });
   }
   
-  // Run removal and category replacement together
-  removeOldCategories();
-  setInterval(removeOldCategories, 2000);
+  // Run immediately on page load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(removeOldCategoriesFromDOM, 500);
+    });
+  } else {
+    removeOldCategoriesFromDOM();
+  }
+  
+  // Also run repeatedly to catch dynamically added elements
+  setInterval(removeOldCategoriesFromDOM, 1500);
   
   // Strategy 7: Aggressively replace old categories with new ones and hide old ones
   function aggressivelyReplaceCategories() {
