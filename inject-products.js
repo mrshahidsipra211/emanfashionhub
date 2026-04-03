@@ -63,51 +63,115 @@
     injectProductsOnDOM();
   }
   
-  // Strategy 6: Aggressively remove old category elements from DOM
-  function removeOldCategoriesFromDOM() {
-    const oldCategories = ['unstitched', 'ready-to-wear', 'Bridal', 'formal', 'Accessories'];
-    
-    // Find ALL elements and remove if they contain ONLY old category text
-    document.querySelectorAll('div, button, [role="button"], li, article, section').forEach(el => {
-      const text = el.textContent?.trim().toLowerCase() || '';
-      const directText = Array.from(el.childNodes)
-        .filter(node => node.nodeType === Node.TEXT_NODE)
-        .map(node => node.textContent.trim().toLowerCase())
-        .join(' ');
+  // Strategy 6: Remove entire "Shop by Category" section and replace with new products button
+  function removeShopByCategory() {
+    // Method 1: Find and remove any section/div that says "Shop by Category"
+    document.querySelectorAll('*').forEach(el => {
+      const text = el.textContent?.toLowerCase() || '';
       
-      // If element is EXACTLY an old category, remove it completely
-      if (oldCategories.some(cat => {
-        return text === cat.toLowerCase() || 
-               (directText && directText.includes(cat.toLowerCase()) && el.children.length <= 2);
-      })) {
-        // Check if parent should also be removed (likely a category card container)
-        const parent = el.parentElement;
-        if (parent && (parent.classList?.toString().includes('grid') || 
-                      parent.classList?.toString().includes('category') ||
-                      parent.classList?.toString().includes('product'))) {
-          // Remove the specific category card
-          el.remove();
-        } else if (el.classList?.toString().includes('category') || 
-                   el.classList?.toString().includes('card') ||
-                   el.tagName === 'BUTTON') {
-          // Direct removal if it's a card or button
+      // If this is the main "Shop by Category" section, remove it
+      if (text.includes('shop by category') || text.includes('explore our diverse collection')) {
+        // Get the closest container (likely parent with all categories)
+        let container = el;
+        let depth = 0;
+        while (container.parentElement && depth < 5) {
+          const childCount = container.parentElement.children.length;
+          // If parent has multiple children (like a grid), we found the container
+          if (childCount > 3 && container.parentElement.children.length < 20) {
+            container = container.parentElement;
+            break;
+          }
+          container = container.parentElement;
+          depth++;
+        }
+        
+        // Remove the entire section
+        if (container) {
+          container.remove();
+        }
+      }
+    });
+    
+    // Method 2: Also look for category grid containers and remove them
+    document.querySelectorAll('[class*="category"], [class*="grid"]').forEach(el => {
+      const text = el.textContent?.toLowerCase() || '';
+      const oldCats = ['unstitched', 'ready-to-wear', 'Bridal', 'formal', 'Accessories'];
+      
+      // If container has old category names, remove it
+      if (oldCats.some(cat => text.includes(cat.toLowerCase()))) {
+        // Count how many old categories are in this container
+        const matchCount = oldCats.filter(cat => text.includes(cat.toLowerCase())).length;
+        // If it has 3+ old categories, it's likely the category section - remove it
+        if (matchCount >= 3) {
           el.remove();
         }
       }
     });
   }
   
-  // Run immediately on page load
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-      setTimeout(removeOldCategoriesFromDOM, 500);
-    });
-  } else {
-    removeOldCategoriesFromDOM();
+  // Add replacement button/banner
+  function addNewProductsButton() {
+    if (document.querySelector('[data-new-products-replacement]')) return; // Already added
+    
+    const replacement = document.createElement('div');
+    replacement.setAttribute('data-new-products-replacement', 'true');
+    replacement.style.cssText = `
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 40px 20px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      margin: 30px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    `;
+    replacement.innerHTML = `
+      <h2 style="margin: 0 0 15px 0;">🎉 NEW PRODUCT COLLECTION 2026</h2>
+      <p style="margin: 0 0 20px 0; font-size: 16px;">Clothes • Jewelry • Watches • Bags • Other Accessories</p>
+      <button style="
+        background: white;
+        color: #667eea;
+        border: none;
+        padding: 15px 40px;
+        font-size: 18px;
+        font-weight: bold;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: transform 0.2s;
+      " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+        EXPLORE NEW PRODUCTS →
+      </button>
+    `;
+    replacement.querySelector('button').onclick = () => {
+      window.location.href = './new-products.html';
+    };
+    replacement.onmouseover = function() { this.style.transform = 'scale(1.02)'; };
+    replacement.onmouseout = function() { this.style.transform = 'scale(1)'; };
+    
+    // Insert after the main heading
+    const root = document.getElementById('root');
+    if (root && root.firstChild) {
+      root.insertBefore(replacement, root.firstChild.nextSibling);
+    }
   }
   
-  // Also run repeatedly to catch dynamically added elements
-  setInterval(removeOldCategoriesFromDOM, 1500);
+  // Run on page load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        removeShopByCategory();
+        addNewProductsButton();
+      }, 1000);
+    });
+  } else {
+    removeShopByCategory();
+    addNewProductsButton();
+  }
+  
+  // Keep removing old categories
+  setInterval(removeShopByCategory, 2000);
   
   // Strategy 7: Aggressively replace old categories with new ones and hide old ones
   function aggressivelyReplaceCategories() {
