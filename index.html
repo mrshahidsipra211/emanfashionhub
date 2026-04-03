@@ -23,8 +23,19 @@
   <body>
     <div id="root"></div>
     <script>
+      // Load additional products from products-data.json
+      window.additionalProducts = [];
+      fetch('./products-data.json')
+        .then(response => response.json())
+        .then(data => {
+          window.additionalProducts = data;
+          console.log('✓ Loaded', data.length, 'additional products');
+        })
+        .catch(err => console.error('Could not load products-data.json:', err));
+    </script>
+    <script>
       // Handle SPA redirect from 404.html
-      (function handleSPARedirect() {
+      (function handleSPARedirect()
         var redirect = sessionStorage.redirect;
         delete sessionStorage.redirect;
         if (redirect && redirect !== window.location.pathname) {
