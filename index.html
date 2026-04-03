@@ -20,8 +20,60 @@
     <script src="./inject-products.js"></script>
     <script type="module" crossorigin src="./assets/index-C5f9fEPq.js"></script>
     <link rel="stylesheet" crossorigin href="./assets/index-D1KQcopq.css">
+    <style>
+      #new-arrivals-banner {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        text-align: center;
+        font-weight: bold;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 10000;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      }
+      
+      #new-arrivals-banner h2 {
+        margin: 0 0 10px 0;
+        font-size: 20px;
+      }
+      
+      #new-arrivals-banner p {
+        margin: 0 0 15px 0;
+        font-size: 14px;
+        opacity: 0.95;
+      }
+      
+      #new-arrivals-banner button {
+        background: white;
+        color: #667eea;
+        border: none;
+        padding: 12px 30px;
+        font-weight: bold;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        font-size: 14px;
+      }
+      
+      #new-arrivals-banner button:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      }
+      
+      body {
+        padding-top: 130px;
+      }
+    </style>
   </head>
   <body>
+    <div id="new-arrivals-banner">
+      <h2>🎉 NEW ARRIVALS COLLECTION 2026</h2>
+      <p>Clothes • Jewelry • Watches • Bags • Other Accessories</p>
+      <button onclick="window.location.href='./new-products.html'">👉 VIEW ALL 8 NEW PRODUCTS</button>
+    </div>
     <div id="root"></div>
     <script>
       // Handle SPA redirect from 404.html
