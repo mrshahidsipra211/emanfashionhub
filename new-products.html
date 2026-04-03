@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Arrivals - Eman Fashion Hub</title>
+    <link rel="stylesheet" href="./static-pages.css">
+    <style>
+        .products-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .product-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .product-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            background: #f5f5f5;
+        }
+        
+        .product-info {
+            padding: 15px;
+        }
+        
+        .product-name {
+            font-weight: bold;
+            margin: 10px 0;
+            font-size: 14px;
+            line-height: 1.3;
+            min-height: 35px;
+        }
+        
+        .product-price {
+            color: #e74c3c;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .product-category {
+            color: #666;
+            font-size: 12px;
+            text-transform: uppercase;
+            margin: 5px 0;
+        }
+        
+        .product-rating {
+            color: #f39c12;
+            font-size: 12px;
+            margin: 5px 0;
+        }
+        
+        .new-badge {
+            display: inline-block;
+            background: #e74c3c;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            margin: 5px 0;
+        }
+        
+        .page-header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .page-header h1 {
+            margin: 0;
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+        
+        .page-header p {
+            margin: 0;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-header">
+        <h1>New Arrivals 🎉</h1>
+        <p>Check out our latest 8 amazing products</p>
+    </div>
+    
+    <div class="products-container" id="products"></div>
+    
+    <script>
+        const products = [
+            {"id": 20, "name": "PU Leather Jewelry Organizer (Imported China) - White, Pink & Black", "category": "accessories", "price": 2500, "originalPrice": 2500, "discount": 0, "image": "./assets/JEWELRY/PU Leather Jewelry/IMG-20260401-WA0062.jpg", "rating": 4.6, "reviews": 18, "isNew": true},
+            {"id": 21, "name": "MARIA B CORDS SET 3PIECE DROP-01 SERIES'26", "category": "unstitched", "price": 2800, "originalPrice": 2800, "discount": 0, "image": "./assets/clothes/Maria B cords set/IMG-20260401-WA0065.jpg", "rating": 4.7, "reviews": 42, "isNew": true},
+            {"id": 22, "name": "ARTICLE SLEEVES MAKHNA", "category": "ready-to-wear", "price": 1300, "originalPrice": 1300, "discount": 0, "image": "./assets/clothes/Article sleeves makhna/IMG-20260401-WA0073.jpg", "rating": 4.5, "reviews": 15, "isNew": true},
+            {"id": 23, "name": "Imported Foldable Girls College Bag", "category": "accessories", "price": 2900, "originalPrice": 2900, "discount": 0, "image": "./assets/bags/College Foldable Bag/IMG-20260401-WA0088.jpg", "rating": 4.8, "reviews": 67, "isNew": true},
+            {"id": 24, "name": "New Trending 2 Pcs Gucci Bag For Women", "category": "accessories", "price": 1800, "originalPrice": 2500, "discount": 28, "image": "./assets/bags/Gucci Bag 2pcs Set/IMG-20260401-WA0106.jpg", "rating": 4.9, "reviews": 89, "isNew": true},
+            {"id": 25, "name": "Dustproof Rotating Luxury Brush Holder", "category": "accessories", "price": 2000, "originalPrice": 2000, "discount": 0, "image": "./assets/other accessories/Dustprrof Rotating Luxury Brush Holder/IMG-20260401-WA0116.jpg", "rating": 4.4, "reviews": 28, "isNew": true},
+            {"id": 26, "name": "Square Magic Mirror Frame", "category": "accessories", "price": 3500, "originalPrice": 3500, "discount": 0, "image": "./assets/image-fallback.png", "rating": 4.5, "reviews": 22, "isNew": true},
+            {"id": 27, "name": "Digital Printed Lawns Collection 2026", "category": "unstitched", "price": 1900, "originalPrice": 1900, "discount": 0, "image": "./assets/clothes/Digital printed lawns/IMG-20260401-WA0124.jpg", "rating": 4.6, "reviews": 35, "isNew": true}
+        ];
+        
+        function renderProducts() {
+            const container = document.getElementById('products');
+            container.innerHTML = products.map(product => `
+                <div class="product-card">
+                    <img src="${product.image}" alt="${product.name}" class="product-image" onerror="this.src='./assets/image-fallback.png'">
+                    <div class="product-info">
+                        <div class="product-category">${product.category}</div>
+                        ${product.isNew ? '<span class="new-badge">NEW</span>' : ''}
+                        <div class="product-name">${product.name}</div>
+                        <div class="product-rating">⭐ ${product.rating} (${product.reviews} reviews)</div>
+                        <div class="product-price">
+                            ${product.discount > 0 ? `<del>₨${product.originalPrice}</del> ` : ''}
+                            ₨${product.price}
+                            ${product.discount > 0 ? ` <span style="color: #e74c3c; font-size: 12px;">-${product.discount}%</span>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        renderProducts();
+    </script>
+</body>
+</html>

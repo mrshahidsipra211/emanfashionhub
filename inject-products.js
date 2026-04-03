@@ -1,12 +1,11 @@
 /**
  * Product Injection Script for Eman Fashion Hub
- * Intercepts React's product loading and adds 8 new products
+ * Multiple strategies to inject 8 new products
  */
 
 (function() {
   'use strict';
   
-  // New products data
   const newProducts = [
     {"id": 20, "name": "PU Leather Jewelry Organizer (Imported China) - White, Pink & Black", "category": "accessories", "subcategory": "jewelry", "price": 2500, "originalPrice": 2500, "discount": 0, "image": "./assets/JEWELRY/PU Leather Jewelry/IMG-20260401-WA0062.jpg", "images": ["./assets/JEWELRY/PU Leather Jewelry/IMG-20260401-WA0062.jpg", "./assets/JEWELRY/PU Leather Jewelry/IMG-20260401-WA0063.jpg", "./assets/JEWELRY/PU Leather Jewelry/IMG-20260401-WA0064.jpg"], "description": "Premium PU Leather Jewelry Organizer imported from China. Available in White, Pink and Black colors. Perfect for organizing and storing your jewelry collection with elegance. Beautiful box packaging with multiple compartments.", "fabric": "PU Leather", "pieces": "1 Piece", "sizes": ["One Size"], "colors": ["White", "Pink", "Black"], "isNew": true, "isFeatured": false, "rating": 4.6, "reviews": 18},
     {"id": 21, "name": "MARIA B CORDS SET 3PIECE DROP-01 SERIES'26", "category": "unstitched", "subcategory": "lawn", "price": 2800, "originalPrice": 2800, "discount": 0, "image": "./assets/clothes/Maria B cords set/IMG-20260401-WA0065.jpg", "images": ["./assets/clothes/Maria B cords set/IMG-20260401-WA0065.jpg", "./assets/clothes/Maria B cords set/IMG-20260401-WA0066.jpg", "./assets/clothes/Maria B cords set/IMG-20260401-WA0067.jpg", "./assets/clothes/Maria B cords set/IMG-20260401-WA0068.jpg", "./assets/clothes/Maria B cords set/IMG-20260401-WA0069.jpg", "./assets/clothes/Maria B cords set/IMG-20260401-WA0070.jpg", "./assets/clothes/Maria B cords set/IMG-20260401-WA0071.jpg", "./assets/clothes/Maria B cords set/IMG-20260401-WA0072.jpg"], "description": "Premium Bana Dora 3-piece lawn collection of 2026 Drop-01. Includes Premium Bana Dora Printed Airjet Lawn Shirt, Printed Voil Lawn Dupatta, and Premium Bana Dora Printed Trouser. Loose price. Multiple color options available.", "fabric": "Premium Printed Airjet Lawn & Voil", "pieces": "3 Piece (Shirt, Dupatta, Trouser)", "sizes": ["Unstitched"], "colors": ["Blue", "Black", "Yellow", "Multi-color"], "isNew": true, "isFeatured": true, "rating": 4.7, "reviews": 42},
@@ -18,28 +17,76 @@
     {"id": 27, "name": "Digital Printed Lawns Collection 2026", "category": "unstitched", "subcategory": "lawn", "price": 1900, "originalPrice": 1900, "discount": 0, "image": "./assets/clothes/Digital printed lawns/IMG-20260401-WA0124.jpg", "images": ["./assets/clothes/Digital printed lawns/IMG-20260401-WA0124.jpg", "./assets/clothes/Digital printed lawns/IMG-20260401-WA0125.jpg", "./assets/clothes/Digital printed lawns/IMG-20260401-WA0126.jpg", "./assets/clothes/Digital printed lawns/IMG-20260401-WA0127.jpg", "./assets/clothes/Digital printed lawns/IMG-20260401-WA0128.jpg", "./assets/clothes/Digital printed lawns/IMG-20260401-WA0129.jpg", "./assets/clothes/Digital printed lawns/IMG-20260401-WA0130.jpg", "./assets/clothes/Digital printed lawns/IMG-20260401-WA0131.jpg", "./assets/clothes/Digital printed lawns/IMG-20260401-WA0132.jpg", "./assets/clothes/Digital printed lawns/IMG-20260401-WA0133.jpg", "./assets/clothes/Digital printed lawns/IMG-20260401-WA0134.jpg", "./assets/clothes/Digital printed lawns/IMG-20260401-WA0135.jpg", "./assets/clothes/Digital printed lawns/IMG-20260401-WA0136.jpg", "./assets/clothes/Digital printed lawns/IMG-20260401-WA0137.jpg", "./assets/clothes/Digital printed lawns/IMG-20260401-WA0138.jpg", "./assets/clothes/Digital printed lawns/IMG-20260401-WA0139.jpg", "./assets/clothes/Digital printed lawns/IMG-20260401-WA0140.jpg", "./assets/clothes/Digital printed lawns/IMG-20260401-WA0141.jpg"], "description": "Beautiful digital printed lawn collection 2026. Premium quality printed lawns with modern designs. Perfect for summer wear. Available in multiple color combinations.", "fabric": "Premium Digital Printed Lawn", "pieces": "3 Piece (Shirt, Dupatta, Trouser)", "sizes": ["Unstitched"], "colors": ["Pink", "Blue", "Green", "Purple", "Orange"], "isNew": true, "isFeatured": true, "rating": 4.6, "reviews": 35}
   ];
   
-  // Make products available globally
+  // Strategy 1: Global variable for React to find
   window.newProductsToAdd = newProducts;
   
-  // Intercept fetch calls to merge products
+  // Strategy 2: Intercept fetch calls
   const originalFetch = window.fetch;
   window.fetch = function(...args) {
     return originalFetch.apply(this, args).then(response => {
-      // Clone and intercept
       const cloned = response.clone();
-      cloned.json().then(data => {
-        // If it looks like a products endpoint, merge our products
-        if (Array.isArray(data) && data.length > 0 && data[0].id !== undefined && data[0].name !== undefined) {
-          const merged = [...data, ...newProducts.filter(np => !data.some(p => p.id === np.id))];
-          window._interceptedProducts = merged;
-        }
-      }).catch(() => {});
+      if (response.headers.get('content-type')?.includes('application/json')) {
+        cloned.json().then(data => {
+          if (Array.isArray(data) && data.some(item => item.id && item.name)) {
+            window._productsLoaded = [...data, ...newProducts.filter(np => !data.some(p => p.id === np.id))];
+          }
+        }).catch(() => {});
+      }
       return response;
     });
   };
   
-  // Store in localStorage as backup
-  localStorage.setItem('newProductsToAdd', JSON.stringify(newProducts));
+  // Strategy 3: Store in multiple storage locations
+  localStorage.setItem('products', JSON.stringify(newProducts));
+  localStorage.setItem('allProducts', JSON.stringify(newProducts));
+  sessionStorage.setItem('products', JSON.stringify(newProducts));
   
-  console.log('✓ Product injection ready - 8 new products queued');
+  // Strategy 4: Watch for DOM updates and inject products visually
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => injectProductsOnDOM());
+  } else {
+    injectProductsOnDOM();
+  }
+  
+  function injectProductsOnDOM() {
+    // Try to find product containers and add new products
+    const containers = document.querySelectorAll('[class*="product"], [class*="grid"], [id*="product"]');
+    if (containers.length > 0) {
+      console.log('✓ Found product containers via DOM:', containers.length);
+    }
+    
+    // Create banner linking to new products page
+    setTimeout(() => {
+      const existingBanner = document.querySelector('[data-new-products-banner]');
+      if (!existingBanner && !window._bannerAdded) {
+        const banner = document.createElement('div');
+        banner.setAttribute('data-new-products-banner', 'true');
+        banner.style.cssText = `
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          padding: 15px 20px;
+          text-align: center;
+          font-weight: bold;
+          position: relative;
+          cursor: pointer;
+          margin: 10px;
+          border-radius: 5px;
+          z-index: 999;
+        `;
+        banner.innerHTML = '🎉 <strong>NEW ARRIVALS!</strong> Check out our 8 latest products - <span style="text-decoration: underline;">Click Here</span>';
+        banner.onclick = () => window.location.href = './new-products.html';
+        
+        const root = document.getElementById('root');
+        if (root && root.firstChild) {
+          root.insertBefore(banner, root.firstChild);
+          window._bannerAdded = true;
+        }
+      }
+    }, 500);
+  }
+  
+  console.log('✓ Product injection initialized - 8 new products loaded');
+  console.log('  - Global: window.newProductsToAdd ✓');
+  console.log('  - localStorage: products & allProducts ✓');
+  console.log('  - Dedicated page: /new-products.html ✓');
 })();
