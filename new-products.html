@@ -6,12 +6,14 @@
     <title>New Arrivals - Eman Fashion Hub</title>
     <link rel="stylesheet" href="./static-pages.css">
     <style>
+        * { box-sizing: border-box; }
+        
         .products-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 20px;
             padding: 20px;
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
         
@@ -21,22 +23,80 @@
             overflow: hidden;
             transition: transform 0.3s, box-shadow 0.3s;
             cursor: pointer;
+            background: white;
+            display: flex;
+            flex-direction: column;
         }
         
         .product-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+        
+        .product-image-wrapper {
+            position: relative;
+            width: 100%;
+            height: 250px;
+            background: #f5f5f5;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .product-image {
             width: 100%;
-            height: 250px;
+            height: 100%;
             object-fit: cover;
-            background: #f5f5f5;
+        }
+        
+        .image-counter {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+        
+        .nav-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+            z-index: 10;
+        }
+        
+        .nav-button:hover {
+            background: rgba(0,0,0,0.8);
+        }
+        
+        .nav-button.left {
+            left: 10px;
+        }
+        
+        .nav-button.right {
+            right: 10px;
         }
         
         .product-info {
             padding: 15px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
         }
         
         .product-name {
@@ -45,12 +105,14 @@
             font-size: 14px;
             line-height: 1.3;
             min-height: 35px;
+            flex-grow: 1;
         }
         
         .product-price {
             color: #e74c3c;
             font-size: 16px;
             font-weight: bold;
+            margin: 8px 0;
         }
         
         .product-category {
@@ -93,6 +155,208 @@
             margin: 0;
             opacity: 0.9;
         }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 0;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideIn 0.3s;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .modal-body {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        .modal-gallery {
+            position: relative;
+        }
+        
+        .modal-image {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            border-radius: 8px;
+            background: #f5f5f5;
+        }
+        
+        .modal-nav {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            background: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-radius: 20px;
+        }
+        
+        .modal-nav button {
+            background: rgba(255,255,255,0.3);
+            border: none;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        
+        .modal-nav button:hover {
+            background: rgba(255,255,255,0.6);
+        }
+        
+        .product-details {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .detail-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .detail-price {
+            font-size: 28px;
+            color: #e74c3c;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .detail-section {
+            margin-bottom: 20px;
+        }
+        
+        .detail-label {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .detail-value {
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        .detail-specs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .spec-item {
+            background: #f8f8f8;
+            padding: 12px;
+            border-radius: 5px;
+        }
+        
+        .spec-item .label {
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+        }
+        
+        .spec-item .value {
+            font-weight: bold;
+            color: #333;
+            margin-top: 5px;
+        }
+        
+        .colors-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .color-badge {
+            background: #f0f0f0;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+        
+        .btn-add-cart {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: auto;
+            transition: transform 0.2s;
+        }
+        
+        .btn-add-cart:hover {
+            transform: scale(1.05);
+        }
+        
+        @media (max-width: 768px) {
+            .modal-body {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-image {
+                height: 300px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -103,37 +367,189 @@
     
     <div class="products-container" id="products"></div>
     
+    <!-- Product Detail Modal -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Product Details</h2>
+                <button class="modal-close" onclick="closeProductDetail()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-gallery">
+                    <img id="modalImage" class="modal-image" src="" alt="Product">
+                    <div class="image-counter">
+                        <span id="currentImageIndex">1</span> / <span id="totalImages">1</span>
+                    </div>
+                    <div class="modal-nav">
+                        <button onclick="previousImage()">❮</button>
+                        <button onclick="nextImage()">❯</button>
+                    </div>
+                </div>
+                <div class="product-details">
+                    <div class="detail-name" id="modalName"></div>
+                    <div class="detail-price" id="modalPrice"></div>
+                    
+                    <div class="detail-specs">
+                        <div class="spec-item">
+                            <div class="label">Category</div>
+                            <div class="value" id="modalCategory"></div>
+                        </div>
+                        <div class="spec-item">
+                            <div class="label">Pieces</div>
+                            <div class="value" id="modalPieces"></div>
+                        </div>
+                        <div class="spec-item">
+                            <div class="label">Fabric</div>
+                            <div class="value" id="modalFabric"></div>
+                        </div>
+                        <div class="spec-item">
+                            <div class="label">Rating</div>
+                            <div class="value" id="modalRating"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value" id="modalDescription"></div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <div class="detail-label">Available Colors</div>
+                        <div class="colors-list" id="modalColors"></div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <div class="detail-label">Available Sizes</div>
+                        <div class="colors-list" id="modalSizes"></div>
+                    </div>
+                    
+                    <button class="btn-add-cart" onclick="addToCart()">Add to Cart</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <script>
-        const products = [
-            {"id": 20, "name": "PU Leather Jewelry Organizer (Imported China) - White, Pink & Black", "category": "accessories", "price": 2500, "originalPrice": 2500, "discount": 0, "image": "./assets/JEWELRY/PU Leather Jewelry/IMG-20260401-WA0062.jpg", "rating": 4.6, "reviews": 18, "isNew": true},
-            {"id": 21, "name": "MARIA B CORDS SET 3PIECE DROP-01 SERIES'26", "category": "unstitched", "price": 2800, "originalPrice": 2800, "discount": 0, "image": "./assets/clothes/Maria B cords set/IMG-20260401-WA0065.jpg", "rating": 4.7, "reviews": 42, "isNew": true},
-            {"id": 22, "name": "ARTICLE SLEEVES MAKHNA", "category": "ready-to-wear", "price": 1300, "originalPrice": 1300, "discount": 0, "image": "./assets/clothes/Article sleeves makhna/IMG-20260401-WA0073.jpg", "rating": 4.5, "reviews": 15, "isNew": true},
-            {"id": 23, "name": "Imported Foldable Girls College Bag", "category": "accessories", "price": 2900, "originalPrice": 2900, "discount": 0, "image": "./assets/bags/College Foldable Bag/IMG-20260401-WA0088.jpg", "rating": 4.8, "reviews": 67, "isNew": true},
-            {"id": 24, "name": "New Trending 2 Pcs Gucci Bag For Women", "category": "accessories", "price": 1800, "originalPrice": 2500, "discount": 28, "image": "./assets/bags/Gucci Bag 2pcs Set/IMG-20260401-WA0106.jpg", "rating": 4.9, "reviews": 89, "isNew": true},
-            {"id": 25, "name": "Dustproof Rotating Luxury Brush Holder", "category": "accessories", "price": 2000, "originalPrice": 2000, "discount": 0, "image": "./assets/other accessories/Dustprrof Rotating Luxury Brush Holder/IMG-20260401-WA0116.jpg", "rating": 4.4, "reviews": 28, "isNew": true},
-            {"id": 26, "name": "Square Magic Mirror Frame", "category": "accessories", "price": 3500, "originalPrice": 3500, "discount": 0, "image": "./assets/other accessories/Square Magic Mirror Frame/VID-20260401-WA0121.mp4", "rating": 4.5, "reviews": 22, "isNew": true},
-            {"id": 27, "name": "Digital Printed Lawns Collection 2026", "category": "unstitched", "price": 1900, "originalPrice": 1900, "discount": 0, "image": "./assets/clothes/Digital printed lawns/IMG-20260401-WA0124.jpg", "rating": 4.6, "reviews": 35, "isNew": true}
+        const fullProducts = [
+            {"id": 20, "name": "PU Leather Jewelry Organizer (Imported China) - White, Pink & Black", "category": "accessories", "subcategory": "jewelry", "price": 2500, "originalPrice": 2500, "discount": 0, "image": "./assets/JEWELRY/PU Leather Jewelry/IMG-20260401-WA0062.jpg", "images": ["./assets/JEWELRY/PU Leather Jewelry/IMG-20260401-WA0062.jpg", "./assets/JEWELRY/PU Leather Jewelry/IMG-20260401-WA0063.jpg", "./assets/JEWELRY/PU Leather Jewelry/IMG-20260401-WA0064.jpg"], "description": "Premium PU Leather Jewelry Organizer imported from China. Available in White, Pink and Black colors. Perfect for organizing and storing your jewelry collection with elegance. Beautiful box packaging with multiple compartments.", "fabric": "PU Leather", "pieces": "1 Piece", "sizes": ["One Size"], "colors": ["White", "Pink", "Black"], "rating": 4.6, "reviews": 18, "isNew": true},
+            {"id": 21, "name": "MARIA B CORDS SET 3PIECE DROP-01 SERIES'26", "category": "unstitched", "subcategory": "lawn", "price": 2800, "originalPrice": 2800, "discount": 0, "image": "./assets/clothes/Maria B cords set/IMG-20260401-WA0065.jpg", "images": ["./assets/clothes/Maria B cords set/IMG-20260401-WA0065.jpg", "./assets/clothes/Maria B cords set/IMG-20260401-WA0066.jpg", "./assets/clothes/Maria B cords set/IMG-20260401-WA0067.jpg", "./assets/clothes/Maria B cords set/IMG-20260401-WA0068.jpg", "./assets/clothes/Maria B cords set/IMG-20260401-WA0069.jpg", "./assets/clothes/Maria B cords set/IMG-20260401-WA0070.jpg", "./assets/clothes/Maria B cords set/IMG-20260401-WA0071.jpg", "./assets/clothes/Maria B cords set/IMG-20260401-WA0072.jpg"], "description": "Premium Bana Dora 3-piece lawn collection of 2026 Drop-01. Includes Premium Bana Dora Printed Airjet Lawn Shirt, Printed Voil Lawn Dupatta, and Premium Bana Dora Printed Trouser. Loose price. Multiple color options available.", "fabric": "Premium Printed Airjet Lawn & Voil", "pieces": "3 Piece (Shirt, Dupatta, Trouser)", "sizes": ["Unstitched"], "colors": ["Blue", "Black", "Yellow", "Multi-color"], "rating": 4.7, "reviews": 42, "isNew": true},
+            {"id": 22, "name": "ARTICLE SLEEVES MAKHNA", "category": "ready-to-wear", "subcategory": "kurta", "price": 1300, "originalPrice": 1300, "discount": 0, "image": "./assets/clothes/Article sleeves makhna/IMG-20260401-WA0073.jpg", "images": ["./assets/clothes/Article sleeves makhna/IMG-20260401-WA0073.jpg", "./assets/clothes/Article sleeves makhna/IMG-20260401-WA0074.jpg", "./assets/clothes/Article sleeves makhna/IMG-20260401-WA0075.jpg", "./assets/clothes/Article sleeves makhna/IMG-20260401-WA0076.jpg", "./assets/clothes/Article sleeves makhna/IMG-20260401-WA0077.jpg", "./assets/clothes/Article sleeves makhna/IMG-20260401-WA0078.jpg", "./assets/clothes/Article sleeves makhna/IMG-20260401-WA0079.jpg", "./assets/clothes/Article sleeves makhna/IMG-20260401-WA0080.jpg", "./assets/clothes/Article sleeves makhna/IMG-20260401-WA0081.jpg", "./assets/clothes/Article sleeves makhna/IMG-20260401-WA0082.jpg", "./assets/clothes/Article sleeves makhna/IMG-20260401-WA0083.jpg", "./assets/clothes/Article sleeves makhna/IMG-20260401-WA0084.jpg", "./assets/clothes/Article sleeves makhna/IMG-20260401-WA0085.jpg", "./assets/clothes/Article sleeves makhna/IMG-20260401-WA0086.jpg", "./assets/clothes/Article sleeves makhna/IMG-20260401-WA0087.jpg"], "description": "Article Sleeves Makhna - Ready to wear cotton jersey kurta. Size from head to bottom is 42 inches. Perfect for casual everyday wear. Available in multiple colors.", "fabric": "Cotton Jersey", "pieces": "1 Piece", "sizes": ["One Size (42 inch)"], "colors": ["Maroon", "Navy", "Beige"], "rating": 4.5, "reviews": 15, "isNew": true},
+            {"id": 23, "name": "Imported Foldable Girls College Bag", "category": "accessories", "subcategory": "bags", "price": 2900, "originalPrice": 2900, "discount": 0, "image": "./assets/bags/College Foldable Bag/IMG-20260401-WA0088.jpg", "images": ["./assets/bags/College Foldable Bag/IMG-20260401-WA0088.jpg", "./assets/bags/College Foldable Bag/IMG-20260401-WA0089.jpg", "./assets/bags/College Foldable Bag/IMG-20260401-WA0090.jpg", "./assets/bags/College Foldable Bag/IMG-20260401-WA0091.jpg", "./assets/bags/College Foldable Bag/IMG-20260401-WA0092.jpg", "./assets/bags/College Foldable Bag/IMG-20260401-WA0093.jpg", "./assets/bags/College Foldable Bag/IMG-20260401-WA0094.jpg", "./assets/bags/College Foldable Bag/IMG-20260401-WA0095.jpg", "./assets/bags/College Foldable Bag/IMG-20260401-WA0096.jpg", "./assets/bags/College Foldable Bag/IMG-20260401-WA0097.jpg", "./assets/bags/College Foldable Bag/IMG-20260401-WA0098.jpg", "./assets/bags/College Foldable Bag/IMG-20260401-WA0099.jpg", "./assets/bags/College Foldable Bag/IMG-20260401-WA0100.jpg", "./assets/bags/College Foldable Bag/IMG-20260401-WA0101.jpg", "./assets/bags/College Foldable Bag/IMG-20260401-WA0102.jpg", "./assets/bags/College Foldable Bag/IMG-20260401-WA0103.jpg", "./assets/bags/College Foldable Bag/IMG-20260401-WA0104.jpg", "./assets/bags/College Foldable Bag/IMG-20260401-WA0105.jpg"], "description": "High-quality imported foldable bag perfect for college and university. Waterproof parachute material with back pocket. Large size with extra folding capability. Available in 6 lovely colors. Light weight and easy to carry. Most demanded item!", "fabric": "Waterproof Parachute Material", "pieces": "1 Piece", "sizes": ["Large with Extra Folding"], "colors": ["Black", "Navy", "Pink", "Purple", "Green", "Brown"], "rating": 4.8, "reviews": 67, "isNew": true},
+            {"id": 24, "name": "New Trending 2 Pcs Gucci Bag For Women", "category": "accessories", "subcategory": "bags", "price": 1800, "originalPrice": 2500, "discount": 28, "image": "./assets/bags/Gucci Bag 2pcs Set/IMG-20260401-WA0106.jpg", "images": ["./assets/bags/Gucci Bag 2pcs Set/IMG-20260401-WA0106.jpg", "./assets/bags/Gucci Bag 2pcs Set/IMG-20260401-WA0107.jpg", "./assets/bags/Gucci Bag 2pcs Set/IMG-20260401-WA0108.jpg", "./assets/bags/Gucci Bag 2pcs Set/IMG-20260401-WA0109.jpg", "./assets/bags/Gucci Bag 2pcs Set/IMG-20260401-WA0110.jpg", "./assets/bags/Gucci Bag 2pcs Set/IMG-20260401-WA0111.jpg", "./assets/bags/Gucci Bag 2pcs Set/IMG-20260401-WA0112.jpg", "./assets/bags/Gucci Bag 2pcs Set/IMG-20260401-WA0113.jpg", "./assets/bags/Gucci Bag 2pcs Set/IMG-20260401-WA0114.jpg", "./assets/bags/Gucci Bag 2pcs Set/IMG-20260401-WA0115.jpg"], "description": "Trending Gucci bag set for women featuring high-quality soft leather. 2-piece set includes main bag and hand wallet. Most trending item with premium quality. Sale: Save 28%!", "fabric": "Soft Leather", "pieces": "2 Piece (Bag + Hand Wallet)", "sizes": ["One Size"], "colors": ["Beige", "Brown", "Black"], "rating": 4.9, "reviews": 89, "isNew": true},
+            {"id": 25, "name": "Dustproof Rotating Luxury Brush Holder", "category": "accessories", "subcategory": "home", "price": 2000, "originalPrice": 2000, "discount": 0, "image": "./assets/other accessories/Dustprrof Rotating Luxury Brush Holder/IMG-20260401-WA0116.jpg", "images": ["./assets/other accessories/Dustprrof Rotating Luxury Brush Holder/IMG-20260401-WA0116.jpg", "./assets/other accessories/Dustprrof Rotating Luxury Brush Holder/IMG-20260401-WA0117.jpg", "./assets/other accessories/Dustprrof Rotating Luxury Brush Holder/IMG-20260401-WA0118.jpg", "./assets/other accessories/Dustprrof Rotating Luxury Brush Holder/IMG-20260401-WA0119.jpg", "./assets/other accessories/Dustprrof Rotating Luxury Brush Holder/VID-20260401-WA0120.mp4"], "description": "Luxury dustproof rotating brush holder with elegant design. Comes in stylish box packing. Perfect for organizing makeup brushes and pencils. Beautiful rotating mechanism.", "fabric": "Premium Plastic", "pieces": "1 Piece", "sizes": ["One Size"], "colors": ["White", "Black", "Rose Gold"], "rating": 4.4, "reviews": 28, "isNew": true},
+            {"id": 26, "name": "Square Magic Mirror Frame", "category": "accessories", "subcategory": "home", "price": 3500, "originalPrice": 3500, "discount": 0, "image": "./assets/other accessories/Square Magic Mirror Frame/VID-20260401-WA0121.mp4", "images": ["./assets/other accessories/Square Magic Mirror Frame/VID-20260401-WA0121.mp4", "./assets/other accessories/Square Magic Mirror Frame/VID-20260401-WA0122.mp4", "./assets/other accessories/Square Magic Mirror Frame/VID-20260401-WA0123.mp4"], "description": "Elegant square magic mirror frame with LED lighting. Creates beautiful visual effects with mirror reflection and smart lighting. Perfect home decor and functional mirror.", "fabric": "Premium Glass & Metal", "pieces": "1 Piece", "sizes": ["One Size"], "colors": ["Silver", "Gold"], "rating": 4.5, "reviews": 22, "isNew": true},
+            {"id": 27, "name": "Digital Printed Lawns Collection 2026", "category": "unstitched", "subcategory": "lawn", "price": 1900, "originalPrice": 1900, "discount": 0, "image": "./assets/clothes/Digital printed lawns/IMG-20260401-WA0124.jpg", "images": ["./assets/clothes/Digital printed lawns/IMG-20260401-WA0124.jpg", "./assets/clothes/Digital printed lawns/IMG-20260401-WA0125.jpg", "./assets/clothes/Digital printed lawns/IMG-20260401-WA0126.jpg", "./assets/clothes/Digital printed lawns/IMG-20260401-WA0127.jpg", "./assets/clothes/Digital printed lawns/IMG-20260401-WA0128.jpg", "./assets/clothes/Digital printed lawns/IMG-20260401-WA0129.jpg", "./assets/clothes/Digital printed lawns/IMG-20260401-WA0130.jpg", "./assets/clothes/Digital printed lawns/IMG-20260401-WA0131.jpg", "./assets/clothes/Digital printed lawns/IMG-20260401-WA0132.jpg", "./assets/clothes/Digital printed lawns/IMG-20260401-WA0133.jpg", "./assets/clothes/Digital printed lawns/IMG-20260401-WA0134.jpg", "./assets/clothes/Digital printed lawns/IMG-20260401-WA0135.jpg", "./assets/clothes/Digital printed lawns/IMG-20260401-WA0136.jpg", "./assets/clothes/Digital printed lawns/IMG-20260401-WA0137.jpg", "./assets/clothes/Digital printed lawns/IMG-20260401-WA0138.jpg", "./assets/clothes/Digital printed lawns/IMG-20260401-WA0139.jpg", "./assets/clothes/Digital printed lawns/IMG-20260401-WA0140.jpg", "./assets/clothes/Digital printed lawns/IMG-20260401-WA0141.jpg"], "description": "Beautiful digital printed lawn collection 2026. Premium quality printed lawns with modern designs. Perfect for summer wear. Available in multiple color combinations.", "fabric": "Premium Digital Printed Lawn", "pieces": "3 Piece (Shirt, Dupatta, Trouser)", "sizes": ["Unstitched"], "colors": ["Pink", "Blue", "Green", "Purple", "Orange"], "rating": 4.6, "reviews": 35, "isNew": true}
         ];
+        
+        let currentProduct = null;
+        let currentImageIndex = 0;
         
         function renderProducts() {
             const container = document.getElementById('products');
-            container.innerHTML = products.map(product => `
-                <div class="product-card">
-                    <img src="${product.image}" alt="${product.name}" class="product-image" onerror="this.src='./assets/image-fallback.png'">
-                    <div class="product-info">
-                        <div class="product-category">${product.category}</div>
-                        ${product.isNew ? '<span class="new-badge">NEW</span>' : ''}
-                        <div class="product-name">${product.name}</div>
-                        <div class="product-rating">⭐ ${product.rating} (${product.reviews} reviews)</div>
-                        <div class="product-price">
-                            ${product.discount > 0 ? `<del>₨${product.originalPrice}</del> ` : ''}
-                            ₨${product.price}
-                            ${product.discount > 0 ? ` <span style="color: #e74c3c; font-size: 12px;">-${product.discount}%</span>` : ''}
+            container.innerHTML = fullProducts.map((product, idx) => {
+                const images = product.images || [product.image];
+                return `
+                    <div class="product-card">
+                        <div class="product-image-wrapper" id="gallery-${idx}">
+                            <img src="${images[0]}" alt="${product.name}" class="product-image" onerror="this.src='./assets/image-fallback.png'">
+                            ${images.length > 1 ? `
+                                <div class="image-counter">${images.length} images</div>
+                                <button class="nav-button left" onclick="event.stopPropagation(); rotateImages(${idx}, -1)">❮</button>
+                                <button class="nav-button right" onclick="event.stopPropagation(); rotateImages(${idx}, 1)">❯</button>
+                            ` : ''}
+                        </div>
+                        <div class="product-info">
+                            <div class="product-category">${product.category}</div>
+                            ${product.isNew ? '<span class="new-badge">NEW</span>' : ''}
+                            <div class="product-name">${product.name}</div>
+                            <div class="product-rating">⭐ ${product.rating} (${product.reviews} reviews)</div>
+                            <div class="product-price">
+                                ${product.discount > 0 ? `<del>₨${product.originalPrice}</del> ` : ''}
+                                ₨${product.price}
+                                ${product.discount > 0 ? ` <span style="color: #e74c3c; font-size: 12px;">-${product.discount}%</span>` : ''}
+                            </div>
+                        </div>
+                        <div style="padding: 10px; text-align: center; border-top: 1px solid #eee; cursor: pointer; background: #f8f8f8; font-weight: bold; color: #667eea;" onclick="openProductDetail(${product.id})">
+                            👁️ View Details
                         </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
+        
+        let galleryIndices = {};
+        
+        function rotateImages(idx, direction) {
+            const gallery = document.getElementById(`gallery-${idx}`);
+            if (!gallery) return;
+            
+            if (galleryIndices[idx] === undefined) {
+                galleryIndices[idx] = 0;
+            }
+            
+            const product = fullProducts[idx];
+            const images = product.images || [product.image];
+            galleryIndices[idx] = (galleryIndices[idx] + direction + images.length) % images.length;
+            
+            const img = gallery.querySelector('.product-image');
+            img.src = images[galleryIndices[idx]];
+        }
+        
+        function openProductDetail(productId) {
+            currentProduct = fullProducts.find(p => p.id === productId);
+            if (!currentProduct) return;
+            
+            currentImageIndex = 0;
+            updateModalContent();
+            document.getElementById('productModal').classList.add('active');
+        }
+        
+        function closeProductDetail() {
+            document.getElementById('productModal').classList.remove('active');
+        }
+        
+        function updateModalContent() {
+            const images = currentProduct.images || [currentProduct.image];
+            
+            document.getElementById('modalImage').src = images[currentImageIndex];
+            document.getElementById('currentImageIndex').textContent = currentImageIndex + 1;
+            document.getElementById('totalImages').textContent = images.length;
+            document.getElementById('modalName').textContent = currentProduct.name;
+            
+            let priceHtml = currentProduct.discount > 0 
+                ? `<del>₨${currentProduct.originalPrice}</del> ₨${currentProduct.price}` 
+                : `₨${currentProduct.price}`;
+            document.getElementById('modalPrice').innerHTML = priceHtml;
+            
+            document.getElementById('modalCategory').textContent = currentProduct.category;
+            document.getElementById('modalPieces').textContent = currentProduct.pieces;
+            document.getElementById('modalFabric').textContent = currentProduct.fabric;
+            document.getElementById('modalRating').textContent = `⭐ ${currentProduct.rating} (${currentProduct.reviews} reviews)`;
+            document.getElementById('modalDescription').textContent = currentProduct.description;
+            
+            document.getElementById('modalColors').innerHTML = currentProduct.colors.map(c => `<div class="color-badge">${c}</div>`).join('');
+            document.getElementById('modalSizes').innerHTML = currentProduct.sizes.map(s => `<div class="color-badge">${s}</div>`).join('');
+        }
+        
+        function nextImage() {
+            const images = currentProduct.images || [currentProduct.image];
+            currentImageIndex = (currentImageIndex + 1) % images.length;
+            updateModalContent();
+        }
+        
+        function previousImage() {
+            const images = currentProduct.images || [currentProduct.image];
+            currentImageIndex = (currentImageIndex - 1 + images.length) % images.length;
+            updateModalContent();
+        }
+        
+        function addToCart() {
+            alert(`Added "${currentProduct.name}" to cart!`);
+        }
+        
+        document.getElementById('productModal').addEventListener('click', function(e) {
+            if (e.target === this) closeProductDetail();
+        });
         
         renderProducts();
     </script>
